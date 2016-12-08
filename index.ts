@@ -1,33 +1,32 @@
-import {Observable} from 'rxjs';
-/* tslint:disable */
+import {transpile} from './lib/transpiler';
 
 const program =
 
 `
-Module "login"
-  Go to "app/login".
-  Fill "mgechev+18@gmail.com" in "#username".
-  Fill "foobar" in "#password".
-  Click "#login"!
+module "login"
+  go to "app/login"
+  fill "mgechev+18@gmail.com" in "#username"
+  fill "foobar" in "#password"
+  click "#login"
 
 
-Feature "login"
-  Test "should login with proper username"
-    Use "login".
-    Wait 5.
-    Assert text "#title" "Welcome".
+test case "login"
+  test "should login with proper username"
+    use "login"
+    wait 5
+    assert text "#title" "Welcome"
 
-  Test "should not login without proper username"
-    Go to "app/login".
-    Fill "mgechev+19@gmail.com" in "#username".
-    Fill "foobar" in "#password"!
-    Click "#login"!
-    Wait 2.
-    Assert text "#title" "Sorry".
+  test "should not login without proper username"
+    go to "app/login"
+    fill "mgechev+19@gmail.com" in "#username"
+    fill "foobar" in "#password"
+    click "#login"
+    wait 2
+    assert text "#title" "Sorry"
 
 
-Feature "play game"
-  Test "should successfully playgame"
+test case "play game"
+  test "should successfully playgame"
     use "login"
     go to "app/earn"
     click "#whatever"
@@ -39,10 +38,4 @@ Feature "play game"
     code \`}\`
 `;
 
-import {transpile} from './lib/transpiler';
-
-Observable.from(program.split(''))
-.subscribe(c => console.log(c));
-
 console.log(transpile(program));
-

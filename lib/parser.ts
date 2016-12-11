@@ -1,22 +1,16 @@
 import {
-  GotoAst,
-  FillAst,
-  CustomCodeAst,
-  AssertTextAst,
-  ClickAst,
-  UseAst,
-  WaitAst,
   TestAst,
   ModuleAst,
   TestCaseAst,
   ProgramAst
 } from './ast';
+import {Construct} from './construct';
 
 import {Token, TokenType} from './lexer';
 
 export class Parser {
   private current = 0;
-  constructor(private tokens: Token[]) {}
+  constructor(private tokens: Token[], private constructs: Construct<any>[]) {}
 
   parse() {
     return this.parseProgramAst();
@@ -62,7 +56,7 @@ export class Parser {
       next = this.next();
       this.current -= 1;
       if (this.isTestCaseOrTestOrModule(current, next)) {
-        return module
+        return module;
       }
       const operator = this.readOperation();
       if (operator) {
@@ -103,7 +97,7 @@ export class Parser {
       next = this.next();
       this.current -= 1;
       if (this.isTestCaseOrTestOrModule(current, next)) {
-        return test
+        return test;
       }
       const operator = this.readOperation();
       if (operator) {
@@ -123,95 +117,10 @@ export class Parser {
       this.current -= 1;
       return operator;
     }
-    if (current.lexeme === 'go' && current.type === TokenType.ReservedWord) {
-      if (next && next.lexeme === 'to' && next.type === TokenType.ReservedWord) {
-        next = this.next();
-        if (!next || next.type !== TokenType.String) {
-          this.report(current, 'go to should receive a URL of type string');
-        }
-        const ast = new GotoAst();
-        ast.url = <string>next.lexeme;
-        return ast;
-      } else {
-        this.report(current, '"go" must be followed by "to"');
-      }
-    }
-    if (current.lexeme === 'assert' && current.type === TokenType.ReservedWord) {
-      if (next && next.lexeme === 'text' && next.type === TokenType.ReservedWord) {
-        next = this.next();
-        if (!next || next.type !== TokenType.String) {
-          this.report(current, 'assert text should a selector and a text');
-        } else {
-          const selector = next.lexeme;
-          next = this.next();
-          if (next && next.type === TokenType.String) {
-            const ast = new AssertTextAst();
-            ast.selector = selector as string;
-            ast.text = next.lexeme as string;
-            return ast;
-          } else {
-            this.report(current, 'assert text should a selector and a text');
-          }
-        }
-      } else {
-        this.report(current, '"go" must be followed by "to"');
-      }
-    }
-    if (current.lexeme === 'fill' && current.type === TokenType.ReservedWord) {
-      if (next && next.type === TokenType.String) {
-        const text = next.lexeme;
-        next = this.next();
-        if (next.lexeme === 'in' && next.type === TokenType.ReservedWord) {
-          next = this.next();
-          if (next.type === TokenType.String) {
-            const ast = new FillAst();
-            ast.text = text as string;
-            ast.where = next.lexeme as string;
-            return ast;
-          } else {
-            this.report(current, 'fill "text" in "elementSelector"');
-          }
-        } else {
-          this.report(current, 'fill "text" in "elementSelector"');
-        }
-      } else {
-        this.report(current, 'fill "text" in "elementSelector"');
-      }
-    }
-    if (current.lexeme === 'click' && current.type === TokenType.ReservedWord) {
-      if (next && next.type === TokenType.String) {
-        const ast = new ClickAst();
-        ast.where = next.lexeme as string;
-        return ast;
-      } else {
-        this.report(current, 'click "cssSelector"');
-      }
-    }
-    if (current.lexeme === 'code' && current.type === TokenType.ReservedWord) {
-      if (next && next.type === TokenType.String) {
-        const ast = new CustomCodeAst();
-        ast.code = next.lexeme as string;
-        return ast;
-      } else {
-        this.report(current, 'code `cssSelector`');
-      }
-    }
-    if (current.lexeme === 'wait' && current.type === TokenType.ReservedWord) {
-      if (next && next.type === TokenType.Number) {
-        const ast = new WaitAst();
-        ast.duration = next.lexeme as number;
-        return ast;
-      } else {
-        this.report(current, 'wait duration');
-      }
-    }
-    if (current.lexeme === 'use' && current.type === TokenType.ReservedWord) {
-      if (next && next.type === TokenType.String) {
-        const ast = new UseAst();
-        ast.name = next.lexeme as string;
-        return ast;
-      } else {
-        this.report(current, 'use "module-name"');
+    for (let i = 0; i < this.constructs.length; i += 1) {
+      const res = this.constructs[i].parse(this, current, next);
+      if (res) {
+        return res;
       }
     }
     this.report(current, 'unknown operator');
@@ -220,7 +129,7 @@ export class Parser {
   isTestCaseOrTestOrModule(token, next) {
     if (this.isTestCaseOrModule(token, next) ||
         (token.type === TokenType.ReservedWord && token.lexeme === 'test')) {
-      return true
+      return true;
     }
     return false;
   }
@@ -241,6 +150,10 @@ export class Parser {
 
   next() {
     return this.tokens[this.current++];
+  }
+
+  prev() {
+    return this.tokens[--this.current];
   }
 
   end() {

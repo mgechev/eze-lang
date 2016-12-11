@@ -1,7 +1,7 @@
 import {
   TestAst,
   ModuleAst,
-  TestCaseAst,
+  Feature,
   ProgramAst
 } from './ast';
 import {Construct} from './construct';
@@ -39,10 +39,10 @@ export class TestVisitor {
   }
 }
 
-export class TestCaseVisitor {
-  visit(testCase: TestCaseAst, symbolTable: SymbolTable, constructs: Construct<any>[]) {
-    let result = `describe('${testCase.name}', () => {\n`;
-    result += testCase.tests.map(t => new TestVisitor().visit(t, symbolTable, '  ', constructs)).join('\n');
+export class FeatureVisitor {
+  visit(feature: Feature, symbolTable: SymbolTable, constructs: Construct<any>[]) {
+    let result = `describe('${feature.name}', () => {\n`;
+    result += feature.tests.map(t => new TestVisitor().visit(t, symbolTable, '  ', constructs)).join('\n');
     result += `});\n\n`;
     return result;
   }
@@ -55,6 +55,6 @@ export class ProgramVisitor {
     const symbolTable = {};
     // Todo: generate and cache
     program.modules.forEach(m => symbolTable[m.name] = m);
-    return program.testCases.map(t => new TestCaseVisitor().visit(t, symbolTable, this.constructs)).join('');
+    return program.features.map(t => new FeatureVisitor().visit(t, symbolTable, this.constructs)).join('');
   }
 }

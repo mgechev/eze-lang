@@ -8,12 +8,12 @@ export class TestAst {
   operations: any[] = [];
 }
 
-export class TestCaseAst {
+export class Feature {
   name: string;
   tests: TestAst[] = [];
 }
 
 export class ProgramAst {
   modules: ModuleAst[] = [];
-  testCases: TestCaseAst[] = [];
+  features: Feature[] = [];
 }

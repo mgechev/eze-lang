@@ -1,7 +1,7 @@
 import {
   TestAst,
   ModuleAst,
-  TestCaseAst,
+  Feature,
   ProgramAst
 } from './ast';
 import {Construct} from './construct';
@@ -27,7 +27,7 @@ export class Parser {
           let next = this.next();
           if (next && next.type === TokenType.ReservedWord && next.lexeme === 'case') {
             // Skipping the token "case"
-            program.testCases.push(this.parseTestCase());
+            program.features.push(this.parseFeature());
           } else {
             this.report(current, 'Unexpected token "test". Test cases should be on top level.');
           }
@@ -38,7 +38,7 @@ export class Parser {
         this.report(current, 'Unexpected token. Only reserved words are allowed on top level.');
       }
     }
-    program.testCases.forEach(t => {
+    program.features.forEach(t => {
       t.tests = t.tests.filter(t => t.operations.length);
     });
     program.modules = program.modules.filter(m => m.operations.length);
@@ -55,7 +55,7 @@ export class Parser {
       current = next;
       next = this.next();
       this.current -= 1;
-      if (this.isTestCaseOrTestOrModule(current, next)) {
+      if (this.isFeatureOrTestOrModule(current, next)) {
         return module;
       }
       const operator = this.readOperation();
@@ -68,23 +68,23 @@ export class Parser {
     return module;
   }
 
-  parseTestCase() {
+  parseFeature() {
     let current = this.next();
-    const testCase = new TestCaseAst();
-    testCase.name = current.lexeme as string;
+    const feature = new Feature();
+    feature.name = current.lexeme as string;
     let next = this.next();
     current = next;
     while (!this.end()) {
       current = next;
       next = this.next();
       this.current -= 1;
-      if (this.isTestCaseOrModule(current, next)) {
+      if (this.isFeatureOrModule(current, next)) {
         this.current -= 1;
-        return testCase;
+        return feature;
       }
-      testCase.tests.push(this.parseTest());
+      feature.tests.push(this.parseTest());
     }
-    return testCase;
+    return feature;
   }
 
   parseTest() {
@@ -96,7 +96,7 @@ export class Parser {
       current = next;
       next = this.next();
       this.current -= 1;
-      if (this.isTestCaseOrTestOrModule(current, next)) {
+      if (this.isFeatureOrTestOrModule(current, next)) {
         return test;
       }
       const operator = this.readOperation();
@@ -113,7 +113,7 @@ export class Parser {
     let current = this.next();
     let next = this.next();
     let operator: any;
-    if (!current || !next || this.isTestCaseOrTestOrModule(current, next)) {
+    if (!current || !next || this.isFeatureOrTestOrModule(current, next)) {
       this.current -= 1;
       return operator;
     }
@@ -126,15 +126,15 @@ export class Parser {
     this.report(current, 'unknown operator');
   }
 
-  isTestCaseOrTestOrModule(token, next) {
-    if (this.isTestCaseOrModule(token, next) ||
+  isFeatureOrTestOrModule(token, next) {
+    if (this.isFeatureOrModule(token, next) ||
         (token.type === TokenType.ReservedWord && token.lexeme === 'test')) {
       return true;
     }
     return false;
   }
 
-  isTestCaseOrModule(token, next) {
+  isFeatureOrModule(token, next) {
     if (token.type === TokenType.ReservedWord && token.lexeme === 'module') {
       return true;
     } else if (token.type === TokenType.ReservedWord && token.lexeme === 'test' &&

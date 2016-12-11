@@ -9,12 +9,9 @@ module "login"
   fill "foobar" in "#password"
   click "#login"
 
-
-test case "login"
-  test "should login with proper username"
-    use "login"
-    wait 5
-    assert text "#title" "Welcome"
+feature "login"
+  Test "should login with proper username"
+    Use "login". Wait 5. Assert text "#title" "Welcome in Minko's website".
 
   test "should not login without proper username"
     go to "app/login"
@@ -25,7 +22,7 @@ test case "login"
     assert text "#title" "Sorry"
 
 
-test case "play game"
+feature "play game"
   test "should successfully playgame"
     use "login"
     go to "app/earn"

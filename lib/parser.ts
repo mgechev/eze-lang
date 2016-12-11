@@ -23,14 +23,8 @@ export class Parser {
       if (current.type === TokenType.ReservedWord) {
         if (current.lexeme === 'module') {
           program.modules.push(this.parseModule());
-        } else if (current.lexeme === 'test') {
-          let next = this.next();
-          if (next && next.type === TokenType.ReservedWord && next.lexeme === 'case') {
-            // Skipping the token "case"
-            program.features.push(this.parseFeature());
-          } else {
-            this.report(current, 'Unexpected token "test". Test cases should be on top level.');
-          }
+        } else if (current.lexeme === 'feature') {
+          program.features.push(this.parseFeature());
         } else {
           this.report(current, 'Unexpected token. Only modules and test cases are allowed on top level.');
         }
@@ -123,7 +117,7 @@ export class Parser {
         return res;
       }
     }
-    this.report(current, 'unknown operator');
+    this.report(current, 'Unknown operator');
   }
 
   isFeatureOrTestOrModule(token, next) {
@@ -137,8 +131,7 @@ export class Parser {
   isFeatureOrModule(token, next) {
     if (token.type === TokenType.ReservedWord && token.lexeme === 'module') {
       return true;
-    } else if (token.type === TokenType.ReservedWord && token.lexeme === 'test' &&
-              next.type === TokenType.ReservedWord && next.lexeme === 'case') {
+    } else if (token.type === TokenType.ReservedWord && token.lexeme === 'feature') {
       return true;
     }
     return false;

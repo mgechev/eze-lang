@@ -32,9 +32,9 @@ export class Lexer {
       } else {
         character += 1;
       }
-      if (!/\s/.test(current)) {
-        if (current === '"' || current === '`') {
-          token = this.readString();
+      if (!/\s|\.|\?|!|;/.test(current)) {
+        if (current === '"' || current === '`' || current === `'`) {
+          token = this.readString(current);
         } else if (!isNaN(parseInt(current))) {
           token = this.readNumber();
         } else {
@@ -49,10 +49,10 @@ export class Lexer {
     return result;
   }
 
-  readString() {
+  readString(startQuote: string) {
     let result = '';
     let current: string;
-    while ((current = this.next()) !== '"' && current !== '`' && !this.end()) {
+    while ((current = this.next()) !== startQuote && !this.end()) {
       result += current;
     }
     return { lexeme: result, type: TokenType.String };

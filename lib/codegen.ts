@@ -7,7 +7,7 @@ import {
 import {Construct} from './construct';
 
 export interface SymbolTable {
-  [key: string]: ModuleAst;
+  [key: string]: string;
 }
 
 export class OperationVisitor {
@@ -53,8 +53,10 @@ export class ProgramVisitor {
 
   visit(program: ProgramAst) {
     const symbolTable = {};
-    // Todo: generate and cache
-    program.modules.forEach(m => symbolTable[m.name] = m);
+    const exprVisitor = new ExpressionListVisitor();
+    program.modules.forEach(
+      m => symbolTable[m.name] = exprVisitor.visit(m.operations, symbolTable, '    ', this.constructs));
     return program.features.map(t => new FeatureVisitor().visit(t, symbolTable, this.constructs)).join('');
   }
 }
+

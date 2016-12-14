@@ -3,11 +3,8 @@ import {transpile} from './lib/transpiler';
 const program =
 
 `
-module "login"
-  go to "app/login"
-  fill "mgechev+18@gmail.com" in "#username"
-  fill "foobar" in "#password"
-  click "#login"
+Module "login".
+  Go to "app/login". Fill "mgechev+18@gmail.com" in "#username". Fill "foobar" in "#password"! Click "#login".
 
 feature "login"
   Test "should login with proper username"

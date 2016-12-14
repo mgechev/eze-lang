@@ -22,7 +22,7 @@ export class Use extends Construct<UseAst> {
 
   generate(ast: UseAst, prefix: string, symbolTable: SymbolTable, constructs: Construct<any>[]) {
     if (ast instanceof UseAst) {
-      return new ExpressionListVisitor().visit(symbolTable[ast.name].operations, symbolTable, prefix, constructs);
+      return symbolTable[ast.name];
     }
     return undefined;
   }

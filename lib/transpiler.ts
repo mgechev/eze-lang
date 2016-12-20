@@ -13,7 +13,8 @@ const defaultConstructs: Construct<any>[] = [
   new c.CustomCode(),
   new c.Fill(),
   new c.Use(),
-  new c.Wait()
+  new c.Wait(),
+  new c.DisableAngular()
 ];
 
 export const transpile = (code: string, constructs: Construct<any>[] = []) => {
@@ -33,3 +34,15 @@ export const transpile = (code: string, constructs: Construct<any>[] = []) => {
   const parser = new Parser(normalizer.normalize(tokens.lex()), constructs);
   return new ProgramVisitor(constructs).visit(parser.parse());
 };
+
+
+console.log(transpile(
+`
+Feature "talks"
+  Test "open talks"
+    Disable Angular
+    Go to "http://blog.mgechev.com"
+    Assert text "h1" "Talks"
+`
+));
+

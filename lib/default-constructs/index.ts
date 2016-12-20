@@ -5,3 +5,5 @@ export * from './fill';
 export * from './goto';
 export * from './use';
 export * from './wait';
+export * from './disable-angular';
+

@@ -7,8 +7,12 @@
     "test": "test"
   },
   "scripts": {
+    "build": "tsc -p .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Minko Gechev <mgechev@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^2.1.4"
+  }
 }

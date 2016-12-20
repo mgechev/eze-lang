@@ -24,6 +24,7 @@ export class Lexer {
     let current: string;
     let line = 0;
     let character = 0;
+    this.program = this.program.replace('\r\n', '\n').replace('\r', '\n');
     while ((current = this.next())) {
       let token: Token;
       if (/\n/.test(current)) {
@@ -70,7 +71,7 @@ export class Lexer {
   private readReservedWord() {
     let result = this.program[this.current - 1];
     let current: string;
-    while ((current = this.next()) !== ' ' && current && !this.end()) {
+    while (!/\s/.test(current = this.next()) && current && !this.end()) {
       result += current;
     }
     return { lexeme: result, type: TokenType.ReservedWord };

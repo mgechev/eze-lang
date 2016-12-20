@@ -1,4 +1,4 @@
-import {Construct} from '../construct';
+import {Construct, ConstructLiteralType} from '../construct';
 import {TokenType, Token} from '../lexer';
 import {Parser} from '../parser';
 import {ExpressionListVisitor, SymbolTable} from '../codegen';
@@ -9,28 +9,22 @@ export class FillAst {
 }
 
 export class Fill extends Construct<FillAst> {
-  parse(parser: Parser, current: Token, next: Token) {
-    if (current.lexeme === 'fill' && current.type === TokenType.ReservedWord) {
-      if (next && next.type === TokenType.String) {
-        const text = next.lexeme;
-        next = parser.next();
-        if (next.lexeme === 'in' && next.type === TokenType.ReservedWord) {
-          next = parser.next();
-          if (next.type === TokenType.String) {
-            const ast = new FillAst();
-            ast.text = text as string;
-            ast.selector = next.lexeme as string;
-            return ast;
-          } else {
-            parser.report(current, 'fill "text" in "elementSelector"');
-          }
-        } else {
-          parser.report(current, 'fill "text" in "elementSelector"');
-        }
-      } else {
-        parser.report(current, 'fill "text" in "elementSelector"');
-      }
-    }
+
+  get title() {
+    return 'Fill textbox';
+  }
+
+  get construct() {
+    return ['fill', ConstructLiteralType.String, 'in', ConstructLiteralType.String];
+  }
+
+  getAst(parser: Parser) {
+    parser.next();
+    const ast = new FillAst();
+    ast.text = parser.next().lexeme as string;
+    parser.next();
+    ast.selector = parser.next().lexeme as string;
+    return ast;
   }
 
   generate(ast: FillAst, prefix: string, symbolTable: SymbolTable, ) {

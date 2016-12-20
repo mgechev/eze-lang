@@ -1,4 +1,4 @@
-import {Construct} from '../construct';
+import {Construct, ConstructLiteralType} from '../construct';
 import {TokenType, Token} from '../lexer';
 import {Parser} from '../parser';
 
@@ -7,20 +7,21 @@ export class GotoAst {
 }
 
 export class Goto extends Construct<GotoAst> {
-  parse(parser: Parser, current: Token, next: Token) {
-    if (current.lexeme === 'go' && current.type === TokenType.ReservedWord) {
-      if (next && next.lexeme === 'to' && next.type === TokenType.ReservedWord) {
-        next = parser.next();
-        if (!next || next.type !== TokenType.String) {
-          parser.report(current, 'go to should receive a URL of type string');
-        }
-        const ast = new GotoAst();
-        ast.url = next.lexeme as string;
-        return ast;
-      } else {
-        parser.report(current, '"go" must be followed by "to"');
-      }
-    }
+
+  get title() {
+    return 'Go to URL';
+  }
+
+  get construct() {
+    return ['go', 'to', ConstructLiteralType.String];
+  }
+
+  getAst(parser: Parser) {
+    parser.next();
+    parser.next();
+    const ast = new GotoAst();
+    ast.url = parser.next().lexeme as string;
+    return ast;
   }
 
   generate(ast: GotoAst, prefix: string) {

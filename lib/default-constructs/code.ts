@@ -1,4 +1,4 @@
-import {Construct} from '../construct';
+import {Construct, ConstructLiteralType} from '../construct';
 import {TokenType, Token} from '../lexer';
 import {Parser} from '../parser';
 import {ExpressionListVisitor, SymbolTable} from '../codegen';
@@ -8,16 +8,20 @@ export class CustomCodeAst {
 }
 
 export class CustomCode extends Construct<CustomCodeAst> {
-  parse(parser: Parser, current: Token, next: Token) {
-    if (current.lexeme === 'code' && current.type === TokenType.ReservedWord) {
-      if (next && next.type === TokenType.String) {
-        const ast = new CustomCodeAst();
-        ast.code = next.lexeme as string;
-        return ast;
-      } else {
-        parser.report(current, 'code `cssSelector`');
-      }
-    }
+
+  get title() {
+    return 'Click on element';
+  }
+
+  get construct() {
+    return ['code', ConstructLiteralType.String];
+  }
+
+  getAst(parser: Parser) {
+    parser.next();
+    const ast = new CustomCodeAst();
+    ast.code = parser.next().lexeme as string;
+    return ast;
   }
 
   generate(ast: CustomCodeAst, prefix: string, symbolTable: SymbolTable, ) {

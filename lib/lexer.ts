@@ -49,7 +49,7 @@ export class Lexer {
     return result;
   }
 
-  readString(startQuote: string) {
+  private readString(startQuote: string) {
     let result = '';
     let current: string;
     while ((current = this.next()) !== startQuote && !this.end()) {
@@ -58,7 +58,7 @@ export class Lexer {
     return { lexeme: result, type: TokenType.String };
   }
 
-  readNumber() {
+  private readNumber() {
     let result = this.program[this.current - 1];
     let current: string;
     while (!isNaN(parseInt(current = this.next())) && !this.end()) {
@@ -67,7 +67,7 @@ export class Lexer {
     return { lexeme: parseInt(result), type: TokenType.Number };
   }
 
-  readReservedWord() {
+  private readReservedWord() {
     let result = this.program[this.current - 1];
     let current: string;
     while ((current = this.next()) !== ' ' && current && !this.end()) {
@@ -76,11 +76,11 @@ export class Lexer {
     return { lexeme: result, type: TokenType.ReservedWord };
   }
 
-  next() {
+  private next() {
     return this.program[this.current++];
   }
 
-  end() {
+  private end() {
     return this.current >= this.program.length;
   }
 }

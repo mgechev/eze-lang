@@ -16,7 +16,19 @@ export class Parser {
     return this.parseProgramAst();
   }
 
-  parseProgramAst() {
+  next() {
+    return this.tokens[this.current++];
+  }
+
+  prev() {
+    return this.tokens[--this.current];
+  }
+
+  end() {
+    return this.current >= this.tokens.length;
+  }
+
+  private parseProgramAst() {
     const program = new ProgramAst();
     while (!this.end()) {
       const current = this.next();
@@ -39,7 +51,7 @@ export class Parser {
     return program;
   }
 
-  parseModule() {
+  private parseModule() {
     let current, next = this.next();
     const module = new ModuleAst();
     if (next.type === TokenType.String) {
@@ -62,7 +74,7 @@ export class Parser {
     return module;
   }
 
-  parseFeature() {
+  private parseFeature() {
     let current = this.next();
     const feature = new Feature();
     feature.name = current.lexeme as string;
@@ -81,7 +93,7 @@ export class Parser {
     return feature;
   }
 
-  parseTest() {
+  private parseTest() {
     let current, next = this.next();
     let name = next.lexeme as string;
     const test = new TestAst();
@@ -103,7 +115,7 @@ export class Parser {
     return test;
   }
 
-  readOperation() {
+  private readOperation() {
     let current = this.next();
     let next = this.next();
     let operator: any;
@@ -111,16 +123,18 @@ export class Parser {
       this.current -= 1;
       return operator;
     }
+    this.current -= 2;
     for (let i = 0; i < this.constructs.length; i += 1) {
-      const res = this.constructs[i].parse(this, current, next);
-      if (res) {
-        return res;
+      const res = this.constructs[i].parse(this);
+      if (!res.errors.length) {
+        return res.ast;
       }
     }
-    this.report(current, 'Unknown operator');
+    const token = this.tokens[this.current];
+    this.report(token, `Unknown operator "${token.lexeme}"`);
   }
 
-  isFeatureOrTestOrModule(token, next) {
+  private isFeatureOrTestOrModule(token, next) {
     if (this.isFeatureOrModule(token, next) ||
         (token.type === TokenType.ReservedWord && token.lexeme === 'test')) {
       return true;
@@ -128,7 +142,7 @@ export class Parser {
     return false;
   }
 
-  isFeatureOrModule(token, next) {
+  private isFeatureOrModule(token, next) {
     if (token.type === TokenType.ReservedWord && token.lexeme === 'module') {
       return true;
     } else if (token.type === TokenType.ReservedWord && token.lexeme === 'feature') {
@@ -137,19 +151,8 @@ export class Parser {
     return false;
   }
 
-  report(token, message) {
-    throw new Error(message + `(${token.position.line}, ${token.position.character})`);
-  }
-
-  next() {
-    return this.tokens[this.current++];
-  }
-
-  prev() {
-    return this.tokens[--this.current];
-  }
-
-  end() {
-    return this.current >= this.tokens.length;
+  private report(token: Token, message: string) {
+    const pos = token.position;
+    throw new Error(`${message} (${pos.line}, ${pos.character}).`);
   }
 }

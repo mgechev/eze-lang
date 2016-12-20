@@ -21,6 +21,8 @@ export const transpile = (code: string, constructs: Construct<any>[] = []) => {
 
   constructs = constructs.concat(defaultConstructs);
 
+  constructs = constructs.sort((a, b) => a.priority - b.priority);
+
   const toLowerCase: Transformer = (token: Token) => {
     if (token.type === TokenType.ReservedWord && typeof token.lexeme === 'string') {
       token.lexeme = token.lexeme.toLowerCase();

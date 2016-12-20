@@ -1,4 +1,4 @@
-import {Construct} from '../construct';
+import {Construct, ConstructLiteralType} from '../construct';
 import {TokenType, Token} from '../lexer';
 import {Parser} from '../parser';
 import {ExpressionListVisitor, SymbolTable} from '../codegen';
@@ -9,28 +9,22 @@ export class AssertTextAst {
 }
 
 export class AssertText extends Construct<AssertTextAst> {
-  parse(parser: Parser, current: Token, next: Token) {
-    if (current.lexeme === 'assert' && current.type === TokenType.ReservedWord) {
-      if (next && next.lexeme === 'text' && next.type === TokenType.ReservedWord) {
-        next = parser.next();
-        if (!next || next.type !== TokenType.String) {
-          parser.report(current, 'assert text should a selector and a text');
-        } else {
-          const selector = next.lexeme;
-          next = parser.next();
-          if (next && next.type === TokenType.String) {
-            const ast = new AssertTextAst();
-            ast.selector = selector as string;
-            ast.text = next.lexeme as string;
-            return ast;
-          } else {
-            parser.report(current, 'assert text should a selector and a text');
-          }
-        }
-      } else {
-        parser.report(current, '"go" must be followed by "to"');
-      }
-    }
+
+  get title() {
+    return 'Assert element textual content';
+  }
+
+  get construct() {
+    return ['assert', 'text', ConstructLiteralType.String, ConstructLiteralType.String];
+  }
+
+  getAst(parser: Parser) {
+    parser.next();
+    parser.next();
+    const ast = new AssertTextAst();
+    ast.selector = parser.next().lexeme as string;
+    ast.text = parser.next().lexeme as string;
+    return ast;
   }
 
   generate(ast: AssertTextAst, prefix: string, symbolTable: SymbolTable, ) {

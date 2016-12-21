@@ -2,6 +2,8 @@ import {
   TestAst,
   ModuleAst,
   Feature,
+  AfterEachAst,
+  BeforeEachAst,
   ProgramAst
 } from './ast';
 import {Construct} from './construct';
@@ -61,7 +63,7 @@ export class Parser {
       current = next;
       next = this.next();
       this.current -= 1;
-      if (this.isFeatureOrTestOrModule(current, next)) {
+      if (this.isFeatureOrTestOrAfterOrBeforeOrModule(current)) {
         return module;
       }
       const operator = this.readOperation();
@@ -83,43 +85,62 @@ export class Parser {
     while (!this.end()) {
       current = next;
       next = this.next();
-      this.current -= 1;
-      if (this.isFeatureOrModule(current, next)) {
+      this.current -= 2;
+      if (this.isFeatureOrModule(current)) {
         this.current -= 1;
         return feature;
       }
-      feature.tests.push(this.parseTest());
+      current = this.next();
+      if (current.lexeme === 'before') {
+        const ast = new BeforeEachAst();
+        // Remove the each keyword
+        const next = this.next();
+        if (next.lexeme !== 'each') {
+          this.report(current, 'Unexpected token. Before should be followed by each');
+        }
+        feature.beforeEach.push(this.parseOperatorSequence(ast));
+      } else if (current.lexeme === 'after') {
+        const ast = new AfterEachAst();
+        // Remove the each keyword
+        const next = this.next();
+        if (next.lexeme !== 'each') {
+          this.report(current, 'Unexpected token. After should be followed by each');
+        }
+        feature.afterEach.push(this.parseOperatorSequence(ast));
+      } else if (current.lexeme === 'test') {
+        const name = this.next();
+        const test = new TestAst();
+        test.name = name.lexeme as string;
+        feature.tests.push(this.parseOperatorSequence(test) as TestAst);
+      } else {
+        this.report(current, 'Unknown token');
+      }
     }
     return feature;
   }
 
-  private parseTest() {
-    let current, next = this.next();
-    let name = next.lexeme as string;
-    const test = new TestAst();
-    test.name = name;
+  private parseOperatorSequence(ast: { operations: any[] }) {
+    let current, next = this.tokens[this.current];
     while (!this.end()) {
       current = next;
       next = this.next();
       this.current -= 1;
-      if (this.isFeatureOrTestOrModule(current, next)) {
-        return test;
+      if (this.isFeatureOrTestOrAfterOrBeforeOrModule(current)) {
+        return ast;
       }
       const operator = this.readOperation();
       if (operator) {
-        test.operations.push(operator);
-      } else {
-        this.current -= 1;
+        ast.operations.push(operator);
       }
     }
-    return test;
+    return ast;
   }
 
   private readOperation() {
     let current = this.next();
     let next = this.next();
     let operator: any;
-    if (!current || !next || this.isFeatureOrTestOrModule(current, next)) {
+    if (!current || !next || this.isFeatureOrTestOrAfterOrBeforeOrModule(current)) {
       this.current -= 1;
       return operator;
     }
@@ -134,15 +155,17 @@ export class Parser {
     this.report(token, `Unknown operator "${token.lexeme}"`);
   }
 
-  private isFeatureOrTestOrModule(token, next) {
-    if (this.isFeatureOrModule(token, next) ||
-        (token.type === TokenType.ReservedWord && token.lexeme === 'test')) {
+  private isFeatureOrTestOrAfterOrBeforeOrModule(token) {
+    if (this.isFeatureOrModule(token) ||
+        (token.type === TokenType.ReservedWord && token.lexeme === 'test') ||
+       (token.type === TokenType.ReservedWord && token.lexeme === 'before') ||
+       (token.type === TokenType.ReservedWord && token.lexeme === 'after')) {
       return true;
     }
     return false;
   }
 
-  private isFeatureOrModule(token, next) {
+  private isFeatureOrModule(token) {
     if (token.type === TokenType.ReservedWord && token.lexeme === 'module') {
       return true;
     } else if (token.type === TokenType.ReservedWord && token.lexeme === 'feature') {

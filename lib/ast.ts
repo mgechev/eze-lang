@@ -8,9 +8,19 @@ export class TestAst {
   operations: any[] = [];
 }
 
+export class BeforeEachAst {
+  operations: any[] = [];
+}
+
+export class AfterEachAst {
+  operations: any[] = [];
+}
+
 export class Feature {
   name: string;
   tests: TestAst[] = [];
+  beforeEach: BeforeEachAst[] = [];
+  afterEach: AfterEachAst[] = [];
 }
 
 export class ProgramAst {

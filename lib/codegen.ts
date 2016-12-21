@@ -2,6 +2,8 @@ import {
   TestAst,
   ModuleAst,
   Feature,
+  AfterEachAst,
+  BeforeEachAst,
   ProgramAst
 } from './ast';
 import {Construct} from './construct';
@@ -39,10 +41,30 @@ export class TestVisitor {
   }
 }
 
+export class AfterEachVisitor {
+  visit(after: AfterEachAst, symbolTable: SymbolTable, prefix: string, constructs: Construct<any>[]) {
+    let result = `${prefix}afterEach(() => {\n`;
+    result += new ExpressionListVisitor().visit(after.operations, symbolTable, prefix + '  ', constructs);
+    result += `${prefix}});\n`;
+    return result;
+  }
+}
+
+export class BeforeEachVisitor {
+  visit(before: BeforeEachAst, symbolTable: SymbolTable, prefix: string, constructs: Construct<any>[]) {
+    let result = `${prefix}beforeEach(() => {\n`;
+    result += new ExpressionListVisitor().visit(before.operations, symbolTable, prefix + '  ', constructs);
+    result += `${prefix}});\n`;
+    return result;
+  }
+}
+
 export class FeatureVisitor {
   visit(feature: Feature, symbolTable: SymbolTable, constructs: Construct<any>[]) {
     let result = `describe('${feature.name}', () => {\n`;
+    result += feature.beforeEach.map(b => new BeforeEachVisitor().visit(b, symbolTable, '  ', constructs)).join('\n');
     result += feature.tests.map(t => new TestVisitor().visit(t, symbolTable, '  ', constructs)).join('\n');
+    result += feature.afterEach.map(a => new AfterEachVisitor().visit(a, symbolTable, '  ', constructs)).join('\n');
     result += `});\n\n`;
     return result;
   }

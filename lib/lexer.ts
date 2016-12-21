@@ -33,7 +33,7 @@ export class Lexer {
       } else {
         character += 1;
       }
-      if (!/\s|\.|\?|!|;/.test(current)) {
+      if (!/\s|\.|\?|!|;|:/.test(current)) {
         if (current === '"' || current === '`' || current === `'`) {
           token = this.readString(current);
         } else if (!isNaN(parseInt(current))) {

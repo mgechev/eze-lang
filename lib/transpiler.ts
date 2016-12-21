@@ -35,14 +35,3 @@ export const transpile = (code: string, constructs: Construct<any>[] = []) => {
   return new ProgramVisitor(constructs).visit(parser.parse());
 };
 
-
-console.log(transpile(
-`
-Feature "talks"
-  Test "open talks"
-    Disable Angular
-    Go to "http://blog.mgechev.com"
-    Assert text "h1" "Talks"
-`
-));
-

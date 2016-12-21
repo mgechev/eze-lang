@@ -15,6 +15,8 @@ export interface Token {
   position?: CodePosition;
 }
 
+const IGNORE_CHARS_REGEXP = /\s|\.|\?|!|;|:/;
+
 export class Lexer {
   private current = 0;
   constructor(private program: string) {}
@@ -33,7 +35,7 @@ export class Lexer {
       } else {
         character += 1;
       }
-      if (!/\s|\.|\?|!|;|:/.test(current)) {
+      if (!IGNORE_CHARS_REGEXP.test(current)) {
         if (current === '"' || current === '`' || current === `'`) {
           token = this.readString(current);
         } else if (!isNaN(parseInt(current))) {
@@ -71,7 +73,7 @@ export class Lexer {
   private readReservedWord() {
     let result = this.program[this.current - 1];
     let current: string;
-    while (!/\s/.test(current = this.next()) && current && !this.end()) {
+    while (!IGNORE_CHARS_REGEXP.test(current = this.next()) && current && !this.end()) {
       result += current;
     }
     return { lexeme: result, type: TokenType.ReservedWord };

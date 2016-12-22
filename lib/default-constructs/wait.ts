@@ -25,7 +25,7 @@ export class Wait extends Construct<WaitAst> {
 
   generate(ast: WaitAst, prefix: string, symbolTable: SymbolTable, ) {
     if (ast instanceof WaitAst) {
-      return `${prefix}browser.wait(new Promise(r => setTimeout(r, ${ast.duration * 1000})));\n`;
+      return `${prefix}browser.wait(new Promise(r => setTimeout(r, ${ast.duration})));\n`;
     }
     return undefined;
   }

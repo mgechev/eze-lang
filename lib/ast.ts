@@ -16,7 +16,7 @@ export class AfterEachAst {
   operations: any[] = [];
 }
 
-export class Feature {
+export class FeatureAst {
   name: string;
   tests: TestAst[] = [];
   beforeEach: BeforeEachAst[] = [];
@@ -25,5 +25,5 @@ export class Feature {
 
 export class ProgramAst {
   modules: ModuleAst[] = [];
-  features: Feature[] = [];
+  features: FeatureAst[] = [];
 }

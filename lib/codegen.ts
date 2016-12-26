@@ -1,7 +1,7 @@
 import {
   TestAst,
   ModuleAst,
-  Feature,
+  FeatureAst,
   AfterEachAst,
   BeforeEachAst,
   ProgramAst
@@ -60,7 +60,7 @@ export class BeforeEachVisitor {
 }
 
 export class FeatureVisitor {
-  visit(feature: Feature, symbolTable: SymbolTable, constructs: Construct<any>[]) {
+  visit(feature: FeatureAst, symbolTable: SymbolTable, constructs: Construct<any>[]) {
     let result = `describe('${feature.name}', () => {\n`;
     result += feature.beforeEach.map(b => new BeforeEachVisitor().visit(b, symbolTable, '  ', constructs)).join('\n');
     result += feature.tests.map(t => new TestVisitor().visit(t, symbolTable, '  ', constructs)).join('\n');

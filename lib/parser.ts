@@ -1,7 +1,7 @@
 import {
   TestAst,
   ModuleAst,
-  Feature,
+  FeatureAst,
   AfterEachAst,
   BeforeEachAst,
   ProgramAst
@@ -78,7 +78,7 @@ export class Parser {
 
   private parseFeature() {
     let current = this.next();
-    const feature = new Feature();
+    const feature = new FeatureAst();
     feature.name = current.lexeme as string;
     let next = this.next();
     current = next;

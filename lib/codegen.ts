@@ -14,6 +14,7 @@ export interface SymbolTable {
 
 export class OperationVisitor {
   visit(operation: any, symbolTable: SymbolTable, prefix: string, constructs: Construct<any>[]) {
+    console.log(constructs);
     for (let i = 0; i < constructs.length; i += 1) {
       let res = constructs[i].generate(operation, prefix, symbolTable, constructs);
       if (res) {

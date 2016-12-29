@@ -6,8 +6,12 @@ import {TokenNormalizer, Transformer} from './token-normalizer';
 
 import * as c from './default-constructs/index';
 import {parse} from './parse';
+import {defaultConstructs} from './default-constructs';
 
 export const transpile = (code: string, constructs: Construct<any>[] = []) => {
-  return new ProgramVisitor(constructs).visit(parse(code, constructs));
+  let transpileConstructs = constructs.concat(defaultConstructs);
+  transpileConstructs = transpileConstructs.sort((a, b) => a.priority - b.priority);
+
+  return new ProgramVisitor(transpileConstructs).visit(parse(code, constructs));
 };
 

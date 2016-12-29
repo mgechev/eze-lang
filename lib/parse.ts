@@ -4,19 +4,7 @@ import {ProgramVisitor} from './codegen';
 import {Construct} from './construct';
 import {TokenNormalizer, Transformer} from './token-normalizer';
 import {ProgramAst} from './ast';
-import * as c from './default-constructs/index';
-
-
-const defaultConstructs: Construct<any>[] = [
-  new c.AssertText(),
-  new c.Goto(),
-  new c.Click(),
-  new c.CustomCode(),
-  new c.Fill(),
-  new c.Use(),
-  new c.Wait(),
-  new c.DisableAngular()
-];
+import {defaultConstructs} from './default-constructs';
 
 export const parse = (code: string, constructs: Construct<any>[] = []) => {
   const tokens = new Lexer(code);

@@ -1,4 +1,5 @@
 export * from './lib/transpiler';
+export * from './lib/parse';
 export * from './lib/parser';
 export * from './lib/ast';
 export * from './lib/lexer';

@@ -5,33 +5,9 @@ import {Construct} from './construct';
 import {TokenNormalizer, Transformer} from './token-normalizer';
 
 import * as c from './default-constructs/index';
-
-const defaultConstructs: Construct<any>[] = [
-  new c.AssertText(),
-  new c.Goto(),
-  new c.Click(),
-  new c.CustomCode(),
-  new c.Fill(),
-  new c.Use(),
-  new c.Wait(),
-  new c.DisableAngular()
-];
+import {parse} from './parse';
 
 export const transpile = (code: string, constructs: Construct<any>[] = []) => {
-  const tokens = new Lexer(code);
-
-  constructs = constructs.concat(defaultConstructs);
-
-  constructs = constructs.sort((a, b) => a.priority - b.priority);
-
-  const toLowerCase: Transformer = (token: Token) => {
-    if (token.type === TokenType.ReservedWord && typeof token.lexeme === 'string') {
-      token.lexeme = token.lexeme.toLowerCase();
-    }
-    return token;
-  };
-  const normalizer = new TokenNormalizer([toLowerCase]);
-  const parser = new Parser(normalizer.normalize(tokens.lex()), constructs);
-  return new ProgramVisitor(constructs).visit(parser.parse());
+  return new ProgramVisitor(constructs).visit(parse(code, constructs));
 };
 
